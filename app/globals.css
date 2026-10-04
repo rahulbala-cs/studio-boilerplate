@@ -1,0 +1,461 @@
+/*
+ * One stylesheet, tokens first.
+ *
+ * Studio's built-in components (Heading, Text, Image, Link, RichText) render
+ * plain semantic HTML, so styling them means styling that markup here.
+ * To style one instance, a Section sets a class on the node (`classes:
+ * ['card']`); deep descendant selectors break when an author reorders things.
+ */
+
+:root {
+  --ink: #14161a;
+  --ink-soft: #454a52;
+  --paper: #fbfaf8;
+  --surface: #ffffff;
+  --surface-muted: #f2f0ec;
+  --accent: #3b5bdb;
+  --accent-ink: #ffffff;
+  --line: #e4e1dc;
+  --shadow: 0 1px 2px rgb(20 22 26 / 6%), 0 8px 24px -12px rgb(20 22 26 / 12%);
+
+  --step--1: clamp(0.82rem, 0.79rem + 0.15vw, 0.9rem);
+  --step-0: clamp(1rem, 0.96rem + 0.2vw, 1.09rem);
+  --step-1: clamp(1.2rem, 1.1rem + 0.5vw, 1.45rem);
+  --step-2: clamp(1.5rem, 1.3rem + 1vw, 2rem);
+  --step-3: clamp(2rem, 1.6rem + 2vw, 3.1rem);
+
+  --gutter: clamp(1rem, 0.6rem + 2vw, 2.5rem);
+  --radius: 12px;
+}
+
+/* Set data-theme="light" on <html> to opt out of dark mode. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --ink: #f2f1ee;
+    --ink-soft: #b3b8c0;
+    --paper: #101215;
+    --surface: #171a1f;
+    --surface-muted: #191c21;
+    --accent: #8ba4ff;
+    --accent-ink: #101215;
+    --line: #2a2f37;
+    --shadow: 0 1px 2px rgb(0 0 0 / 40%), 0 8px 24px -12px rgb(0 0 0 / 60%);
+  }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family:
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    'Segoe UI',
+    Roboto,
+    sans-serif;
+  font-size: var(--step-0);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* ── Section Shell (registered) ───────────────────────────────────────────── */
+.shell {
+  width: 100%;
+  padding-inline: var(--gutter);
+}
+.shell--d-compact {
+  padding-block: 1rem;
+}
+.shell--d-normal {
+  padding-block: clamp(2.5rem, 1.5rem + 4vw, 5rem);
+}
+.shell--d-spacious {
+  padding-block: clamp(4rem, 2rem + 7vw, 8rem);
+}
+.shell--muted {
+  background: var(--surface-muted);
+}
+.shell--accent {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+.shell--accent a {
+  color: var(--accent-ink);
+}
+/* The inverse of the page (so in dark mode it is the light band). `.shell` is
+   doubled to out-rank `.shell p` below. */
+.shell--dark {
+  background: var(--ink);
+  color: var(--paper);
+}
+.shell.shell--dark p,
+.shell.shell--dark .eyebrow,
+.shell--dark a:not(.cta) {
+  color: inherit;
+}
+.shell__inner {
+  margin-inline: auto;
+  width: 100%;
+}
+.shell--w-narrow .shell__inner {
+  max-width: 44rem;
+}
+.shell--w-normal .shell__inner {
+  max-width: 64rem;
+}
+.shell--w-wide .shell__inner {
+  max-width: 78rem;
+}
+
+/* ── Stack (registered) ───────────────────────────────────────────────────── */
+.stack {
+  display: flex;
+  min-width: 0;
+}
+/* Only a band's own stack spans it; nested stacks size to their content. */
+.shell__inner > .stack,
+.stack--vertical > .stack,
+.stack--grid > .stack {
+  width: 100%;
+}
+.stack--vertical {
+  flex-direction: column;
+}
+.stack--horizontal {
+  flex-direction: row;
+}
+.stack--wrap {
+  flex-wrap: wrap;
+}
+/* Equal columns that collapse to one on a narrow screen. Keep the basis a plain
+   length: a percentage inside min() makes the columns wrap too early. */
+.stack--split {
+  flex-direction: row;
+}
+.stack--split > * {
+  flex: 1 1 22rem;
+  min-width: 0;
+}
+
+/* Media on the left: the tree is copy-then-media, so reverse the row. */
+.stack--split.stack--side-left {
+  flex-direction: row-reverse;
+}
+
+/* A real grid, so a trailing card never stretches across the row. */
+.stack--grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(17rem, 100%), 1fr));
+}
+.stack--gap-none {
+  gap: 0;
+}
+.stack--gap-tight {
+  gap: 0.5rem;
+}
+.stack--gap-normal {
+  gap: 1.25rem;
+}
+.stack--gap-loose {
+  gap: 2rem;
+}
+.stack--align-start {
+  align-items: flex-start;
+}
+.stack--align-center {
+  align-items: center;
+}
+.stack--align-end {
+  align-items: flex-end;
+}
+.stack--align-stretch {
+  align-items: stretch;
+}
+.stack--align-between {
+  align-items: center;
+  justify-content: space-between;
+}
+/* Grids align by track, not by flex alignment. */
+.stack--grid.stack--align-stretch,
+.stack--grid.stack--align-start {
+  align-items: initial;
+}
+
+/* ── Node classes: one instance, not every element of a kind ─────────────── */
+.brand-mark {
+  width: 2rem;
+  height: 2rem;
+  flex: none;
+}
+
+.media {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  border-radius: var(--radius);
+  background: var(--surface-muted);
+}
+/* Cap lede images so they don't push the page below the first screen. */
+.shell--w-normal .media,
+.shell--w-narrow .media {
+  max-height: 26rem;
+}
+
+/* Portrait photography (tiles, product cards) and a taller hero image. */
+.media--portrait {
+  aspect-ratio: 4 / 5;
+}
+.media--tall {
+  aspect-ratio: 4 / 5;
+  max-height: 34rem;
+}
+
+/* ── Shop blocks ──────────────────────────────────────────────────────────── */
+/* Full-bleed hero: the image fills the frame and the copy sits over it. */
+.bleed {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius);
+  min-height: clamp(24rem, 50vw, 34rem);
+  justify-content: flex-end;
+  isolation: isolate;
+}
+.bleed__media {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: -2;
+}
+.bleed::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(to top, rgb(10 12 16 / 78%), rgb(10 12 16 / 10%) 65%);
+  /* Decoration only: let clicks reach the image so Visual Editor can select it. */
+  pointer-events: none;
+}
+.bleed__copy {
+  padding: clamp(1.5rem, 1rem + 3vw, 3.5rem);
+  max-width: 40rem;
+  color: #fbfaf8;
+}
+/* `.shell` in front to out-rank `.shell p` below. */
+.shell .bleed__copy p,
+.shell .bleed__copy .eyebrow {
+  color: inherit;
+}
+
+.promo__message {
+  font-weight: 600;
+}
+.shell--dark .cta--secondary,
+.shell--accent .cta--secondary {
+  color: inherit;
+  border-color: currentColor;
+}
+/* A primary button on an accent band would be accent on accent: invert it. */
+.shell--accent .cta--primary {
+  background: var(--accent-ink);
+  color: var(--accent);
+}
+
+/* Tiles stay two across even on a phone. */
+.stack--grid.tiles {
+  grid-template-columns: repeat(auto-fit, minmax(min(10rem, 100%), 1fr));
+}
+.tile .media {
+  margin-bottom: 0.25rem;
+}
+.product .price {
+  font-weight: 650;
+  color: var(--ink);
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 0.85rem 0.85rem 1.1rem;
+  box-shadow: var(--shadow);
+  height: 100%;
+}
+.card .media {
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  margin-bottom: 0.35rem;
+}
+
+/* ── Eyebrow (registered) ─────────────────────────────────────────────────── */
+.eyebrow {
+  margin: 0;
+  font-size: var(--step--1);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+.shell--accent .eyebrow {
+  color: var(--accent-ink);
+  opacity: 0.85;
+}
+
+/* ── CTA Button (registered) ──────────────────────────────────────────────── */
+.cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.7rem 1.25rem;
+  border-radius: 999px;
+  font-size: var(--step--1);
+  font-weight: 600;
+  text-decoration: none;
+  border: 1px solid transparent;
+  transition:
+    transform 0.12s ease,
+    opacity 0.12s ease;
+}
+.cta:hover {
+  transform: translateY(-1px);
+}
+.cta:focus-visible,
+.nav-link:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+.shell--accent .cta:focus-visible {
+  outline-color: var(--accent-ink);
+}
+@media (prefers-reduced-motion: reduce) {
+  .cta {
+    transition: none;
+  }
+  .cta:hover {
+    transform: none;
+  }
+}
+.cta--primary {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+.cta--secondary {
+  background: transparent;
+  color: var(--ink);
+  border-color: var(--line);
+}
+.cta--quiet {
+  padding-inline: 0;
+  padding-block: 0.25rem;
+  background: none;
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  margin-top: auto;
+}
+
+/* ── Studio built-ins render plain HTML — style that ─────────────────────── */
+.shell h1,
+.shell h2,
+.shell h3 {
+  margin: 0;
+  line-height: 1.15;
+  letter-spacing: -0.015em;
+  font-weight: 650;
+  text-wrap: balance;
+}
+.shell h1 {
+  font-size: var(--step-3);
+}
+.shell h2 {
+  font-size: var(--step-2);
+}
+.shell h3 {
+  font-size: var(--step-1);
+  line-height: 1.25;
+}
+.shell p {
+  margin: 0;
+  color: var(--ink-soft);
+  max-width: 62ch;
+  text-wrap: pretty;
+}
+.shell--accent p {
+  color: inherit;
+  opacity: 0.9;
+}
+.card h3 {
+  font-size: var(--step-1);
+}
+
+/* Rich text. `.shell` is in every selector so these out-rank `.shell p`. */
+.shell .prose > * + * {
+  margin-top: 0.9em;
+}
+.shell .prose h2,
+.shell .prose h3 {
+  margin-top: 1.6em;
+}
+.shell .prose h2 + p,
+.shell .prose h3 + p {
+  margin-top: 0.5em;
+}
+/* Link colour is scoped to rich text: a bare `.shell a` would out-rank
+   `.cta--primary` and hide the button's label. */
+.shell .prose a {
+  color: var(--accent);
+  text-underline-offset: 3px;
+}
+.shell ul,
+.shell ol {
+  margin: 1em 0;
+  padding-left: 1.25rem;
+  color: var(--ink-soft);
+}
+.shell li + li {
+  margin-top: 0.4em;
+}
+/* Navigation links: a class the Section sets on the node. */
+.nav-link {
+  text-decoration: none;
+  color: var(--ink-soft);
+  font-size: var(--step--1);
+  font-weight: 500;
+}
+.nav-link:hover {
+  color: var(--accent);
+}
+
+/* ── Inside Contentstack's editors only ───────────────────────────────────────
+   lib/editor-hints.ts sets data-cs-editing on <html> inside an editor iframe and
+   labels each empty field, so it has a size to click. Never applies to visitors. */
+[data-cs-editing] [data-cs-empty] {
+  display: inline-block;
+  min-width: 8ch;
+  min-height: 1.5em;
+  outline: 1px dashed color-mix(in srgb, currentColor 45%, transparent);
+  outline-offset: 2px;
+}
+[data-cs-editing] [data-cs-empty]::before {
+  content: attr(data-cs-empty);
+  opacity: 0.55;
+  font-style: italic;
+}
