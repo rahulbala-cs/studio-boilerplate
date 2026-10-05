@@ -6,20 +6,20 @@ import 'server-only';
  * It imports `studio-core`, never `studio-react`. studio-react's components call
  * `useContext`, and importing them into a Server Component, even indirectly,
  * fails with "Cannot read properties of null (reading 'useContext')".
- * Rendering lives in lib/studio.client.ts.
+ * Rendering lives in studio/client.ts.
  */
 import { studioSdk } from '@contentstack/studio-core';
 import { fetchTemplateEntry } from './complete-entry';
-import { createStack, compositionsCt } from './stack';
+import { createStack, compositionsCt } from '@/lib/stack';
 
 export const stack = createStack();
 
 export const sdk = studioSdk.init({
   stackSdk: stack,
   contentTypeUid: compositionsCt,
-  // Both options must match studio.client.ts.
+  // Both options must match studio/client.ts.
   // appendTags: emits the data-cslp edit tags Visual Editor maps elements to fields with.
   cslp: { appendTags: true },
-  // Gives a new entry every field, so all of it is editable. See lib/complete-entry.ts.
+  // Gives a new entry every field, so all of it is editable. See studio/complete-entry.ts.
   fetchTemplateEntry,
 });

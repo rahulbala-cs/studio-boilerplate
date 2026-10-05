@@ -3,14 +3,14 @@
 /**
  * The CLIENT half: SDK init, Live Preview, and the component registry.
  *
- * Everything React-aware lives behind this boundary. See lib/studio.server.ts
+ * Everything React-aware lives behind this boundary. See studio/server.ts
  * for why the two halves are separate.
  */
 import ContentstackLivePreview from '@contentstack/live-preview-utils';
 import { studioSdk } from '@contentstack/studio-react';
 import { fetchTemplateEntry } from './complete-entry';
 import { installEditorHints } from './editor-hints';
-import { createStack, compositionsCt, apiKey, environment, previewToken } from './stack';
+import { createStack, compositionsCt, apiKey, environment, previewToken } from '@/lib/stack';
 
 const stack = createStack();
 
@@ -40,7 +40,7 @@ try {
   console.warn('[studio] Live Preview init failed; continuing without it.', err);
 }
 
-// Same options as studio.server.ts; see the comments there.
+// Same options as studio/server.ts; see the comments there.
 studioSdk.init({
   stackSdk: stack,
   contentTypeUid: compositionsCt,

@@ -17,13 +17,13 @@
  * the entry the normal way, then gives every field in the content type schema
  * an empty value of the right shape. Existing values are never touched. Empty
  * strings render as nothing (no default kicks in), every field gets its tag,
- * and lib/editor-hints.ts makes empty tagged fields visible inside the editor.
+ * and studio/editor-hints.ts makes empty tagged fields visible inside the editor.
  *
  * It is a no-op for a fully filled entry, so it is on for visitors too: a field
  * an editor deliberately left blank renders blank, never a palette default.
  */
 import type { TemplateEntryFetcher } from '@contentstack/studio-client';
-import { apiKey, deliveryToken, environment, deliveryHost } from './stack';
+import { apiKey, deliveryToken, environment, deliveryHost } from '@/lib/stack';
 
 type Field = {
   uid: string;

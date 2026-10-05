@@ -27,8 +27,8 @@ export default function CanvasPage() {
     // Init and registrations must land before the canvas renders, so they are
     // awaited in order rather than imported at module scope.
     (async () => {
-      await import('@/lib/studio.client');
-      await import('@/lib/studio-components');
+      await import('@/studio/client');
+      await import('@/studio/register');
       const { StudioCanvas } = await import('@contentstack/studio-react');
       if (!cancelled) setCanvas(() => StudioCanvas as ComponentType);
     })();

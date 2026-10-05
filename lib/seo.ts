@@ -14,7 +14,7 @@ import 'server-only';
  */
 import type { Metadata } from 'next';
 import { createStack } from './stack';
-import { resolveComposition } from './resolve-composition';
+import { resolveComposition } from '@/studio/resolve-composition';
 
 type SeoEntry = {
   title?: string;

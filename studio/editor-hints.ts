@@ -3,7 +3,7 @@
 /**
  * Empty fields, made visible and clickable inside Contentstack's editors.
  *
- * lib/complete-entry.ts gives every field of a new entry an edit tag. A tagged
+ * studio/complete-entry.ts gives every field of a new entry an edit tag. A tagged
  * field that is still empty renders as an element with no size, though, and
  * Visual Editor cannot select what has no size. So inside an editor iframe
  * (Visual Editor, Live Preview, Studio), every empty tagged element is labelled
@@ -46,7 +46,7 @@ function labelEmptyFields() {
 
 let installed = false;
 
-/** Called once from lib/studio.client.ts. A no-op for visitors. */
+/** Called once from studio/client.ts. A no-op for visitors. */
 export function installEditorHints() {
   if (installed || !inIframe()) return;
   installed = true;

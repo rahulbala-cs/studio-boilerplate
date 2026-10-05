@@ -7,7 +7,7 @@
  * `catch { notFound() }` turns every CDA outage and expired token into a silent
  * 404: the site looks empty rather than broken, and monitoring sees nothing.
  */
-import { sdk, stack } from '@/lib/studio.server';
+import { sdk, stack } from './server';
 
 type Sdk = typeof sdk;
 type FetchArgs = Parameters<Sdk['fetchCompositionData']>;

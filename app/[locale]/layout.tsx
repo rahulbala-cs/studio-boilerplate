@@ -13,7 +13,7 @@ export const metadata: Metadata = {
  * Keep Studio imports out of it. In `next dev` each route instantiates the
  * layout's imports separately, and two Studio renderers sharing one React
  * context make every page 500 ("multiple renderers"). The SDK boots in
- * [[...slug]]/StudioRender.tsx and canvas/page.tsx instead.
+ * studio/StudioRender.tsx and canvas/page.tsx instead.
  *
  * No header or footer here either: both are Studio Sections, so authors can
  * edit them.

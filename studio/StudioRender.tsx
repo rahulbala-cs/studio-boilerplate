@@ -10,8 +10,8 @@
  * This is also the ONLY module in the server graph that pulls in the Studio
  * renderer — see app/[locale]/layout.tsx for why that matters.
  */
-import '@/lib/studio.client'; // studioSdk.init + Live Preview
-import '@/lib/studio-components'; // registerComponent calls
+import './client'; // studioSdk.init + Live Preview
+import './register'; // registerComponents call
 import { useEffect, useState } from 'react';
 import { registerBreakpoints, StudioComponent } from '@contentstack/studio-react';
 

@@ -3,7 +3,7 @@
  *
  * Deliberately free of any React import: this module is pulled into BOTH the
  * server and the client graphs, and dragging React components into the server
- * graph is what breaks App Router (see lib/studio.server.ts).
+ * graph is what breaks App Router (see studio/server.ts).
  */
 import Contentstack from '@contentstack/delivery-sdk';
 

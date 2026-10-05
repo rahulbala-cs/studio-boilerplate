@@ -13,10 +13,10 @@
  */
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
-import { resolveComposition } from '@/lib/resolve-composition';
+import { resolveComposition } from '@/studio/resolve-composition';
 import { metadataForUrl } from '@/lib/seo';
 import { contentstackLocale, isLocale } from '@/lib/locales';
-import { StudioRender } from './StudioRender';
+import { StudioRender } from '@/studio/StudioRender';
 
 type Params = { locale: string; slug?: string[] };
 type Search = Record<string, string | string[] | undefined>;
@@ -40,7 +40,7 @@ const queryFrom = (searchParams: Search) =>
  * (`cs-composable-studio`, `builder=true`) or its preview pane (`hash`,
  * `live_preview`). These are the SDK's own stable signals — the same ones its
  * `isStudioEditorMode()` reads. That helper ships in `studio-react`, which must
- * not be imported on the server (see lib/studio.server.ts), so the check is
+ * not be imported on the server (see studio/server.ts), so the check is
  * repeated here.
  */
 function inStudio(searchQuery: string) {

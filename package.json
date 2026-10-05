@@ -14,7 +14,7 @@
     "provision:sections": "node scripts/04-author-sections.mjs",
     "provision:templates": "node scripts/05-author-templates.mjs",
     "verify": "node scripts/06-verify.mjs",
-    "format": "prettier --write \"app/**/*.{ts,tsx,css}\" \"components/**/*.{ts,tsx}\" \"lib/**/*.ts\" \"scripts/**/*.mjs\" middleware.ts next.config.mjs"
+    "format": "prettier --write \"app/**/*.{ts,tsx,css}\" \"components/**/*.{ts,tsx}\" \"lib/**/*.ts\" \"studio/**/*.{ts,tsx}\" \"scripts/**/*.mjs\" middleware.ts next.config.mjs"
   },
   "dependencies": {
     "@contentstack/delivery-sdk": "5.6.0",

@@ -105,7 +105,7 @@ Section only if their content types name the field identically.
 
 ### 2. Components — your code, in Studio's palette
 
-Four registered components in [`lib/studio-components.ts`](lib/studio-components.ts):
+Four registered components in [`studio/register.ts`](studio/register.ts):
 
 | Component | Kind | Why it exists |
 |---|---|---|
@@ -228,11 +228,11 @@ A new entry holds only the fields someone has typed into. Other fields are
 missing, or `null` in a draft, so Studio shows component defaults ("Your text
 here") and those fields get no edit tag: they can only be filled in from the form.
 
-- [`lib/complete-entry.ts`](lib/complete-entry.ts) uses the SDK's
+- [`studio/complete-entry.ts`](studio/complete-entry.ts) uses the SDK's
   `fetchTemplateEntry` hook to give every missing or `null` field an empty value
   of the right shape (`''`, `{ url: '' }` for images, `[]` for lists). Every field
   is then tagged and clickable. Filled values are never touched.
-- [`lib/editor-hints.ts`](lib/editor-hints.ts) draws empty fields as a dashed
+- [`studio/editor-hints.ts`](studio/editor-hints.ts) draws empty fields as a dashed
   "Add Headline" box, inside an editor iframe only.
 
 ### 7. Pages — one route
@@ -309,13 +309,17 @@ a composition creates an unpublished version, and every other check says it work
 
 ## Design notes
 
-- **Server and client halves.** [`lib/studio.server.ts`](lib/studio.server.ts)
+- **Server and client halves.** [`studio/server.ts`](studio/server.ts)
   imports `@contentstack/studio-core` (fetching only);
-  [`lib/studio.client.ts`](lib/studio.client.ts) imports `@contentstack/studio-react`.
+  [`studio/client.ts`](studio/client.ts) imports `@contentstack/studio-react`.
   Importing `studio-react` from a Server Component crashes with "Cannot read
   properties of null (reading 'useContext')".
+- **Studio wiring lives in `studio/`.** Components stay in `components/` (they are
+  ordinary React components) and routes stay in `app/`. There is no
+  `studio/index.ts`: one file re-exporting both halves would pull `studio-react`
+  into the server graph, so import each file directly.
 - **No header, footer or SDK boot in the layout.** Header and footer are Sections,
-  so authors can edit them. The SDK boots in `StudioRender.tsx` and the canvas
+  so authors can edit them. The SDK boots in `studio/StudioRender.tsx` and the canvas
   route, not the shared layout.
 - **`seo` has no Section.** It renders into `<head>` through `generateMetadata`,
   with its own fetch, because the composition only carries fields Sections bind.
@@ -330,7 +334,7 @@ a composition creates an unpublished version, and every other check says it work
 - **Design tokens.** Worth adding next: registering your colours and spacing makes
   them available in Studio's Design panel.
 - **Embedded entries in rich text.** Register a renderer when you allow embeds;
-  [`lib/studio-components.ts`](lib/studio-components.ts) has an example in a comment.
+  [`studio/register.ts`](studio/register.ts) has an example in a comment.
 
 ---
 
@@ -341,14 +345,14 @@ a composition creates an unpublished version, and every other check says it work
    `npm run provision:stack`. The scripts own these content types: fields added in
    the UI are overwritten on re-run.
 3. Replace the components in [`components/`](components), update
-   [`lib/studio-components.ts`](lib/studio-components.ts), and restart the dev server.
+   [`studio/register.ts`](studio/register.ts), and restart the dev server.
 4. Edit [`scripts/lib/sections.mjs`](scripts/lib/sections.mjs) or
    [`scripts/lib/shop-sections.mjs`](scripts/lib/shop-sections.mjs) and re-run
    `npm run provision:sections`; edit [`scripts/lib/templates.mjs`](scripts/lib/templates.mjs)
    and re-run `npm run provision:templates`.
 5. Run `npm run verify` before you call it done.
 
-After editing files in `lib/` or `components/`, **restart `npm run dev`**. A hot
+After editing files in `studio/`, `lib/` or `components/`, **restart `npm run dev`**. A hot
 reload can leave the SDK in a broken state ("Invalid hook call", every page 500s)
 until the server restarts.
 
@@ -376,24 +380,26 @@ on it.
 ```
 app/
   [locale]/[[...slug]]/page.tsx          one catch-all route: every Studio page
-  [locale]/[[...slug]]/StudioRender.tsx  client boundary that renders a composition
   [locale]/canvas/page.tsx               the route Studio iframes to author Sections
   [locale]/layout.tsx                    root layout: <html lang>, no header or footer
   globals.css                            tokens, then the markup Studio renders
 
 middleware.ts              redirects unprefixed URLs to a locale
 next.config.mjs            frame-ancestors header; no trailing-slash redirect
-components/                the four registered components + palette thumbnails
+components/                the four registered components
 lib/
   locales.ts               URL prefix → stack locale code
   stack.ts                 Delivery SDK + region hosts (no React)
-  studio.server.ts         server half: fetching only
-  studio.client.ts         client half: rendering, Live Preview, registry
-  studio-components.ts     registerComponent calls
+  seo.ts                   <head> metadata from the seo Global Field
+studio/                    everything that talks to the Studio SDK
+  server.ts                server half: fetching only
+  client.ts                client half: rendering, Live Preview
+  register.ts              one registerComponents call
+  thumbnails.ts            palette thumbnails, as inline SVG
+  StudioRender.tsx         client boundary that renders a composition
+  resolve-composition.ts   a composition miss becomes a 404, not a 500
   complete-entry.ts        gives a new entry every field, so all of it is editable
   editor-hints.ts          "Add …" boxes for empty fields, inside editors only
-  resolve-composition.ts   a composition miss becomes a 404, not a 500
-  seo.ts                   <head> metadata from the seo Global Field
 
 scripts/
   provision.mjs            runs 01→06

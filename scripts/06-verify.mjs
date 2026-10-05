@@ -57,8 +57,8 @@ async function main() {
   // 1 — Visual Editor wiring. Without appendTags no component gets an edit tag;
   // without builder mode Visual Editor opens but nothing is clickable; without
   // fetchTemplateEntry a new entry's empty fields can only be edited in the form.
-  const client = code(read('lib/studio.client.ts'));
-  const server = code(read('lib/studio.server.ts'));
+  const client = code(read('studio/client.ts'));
+  const server = code(read('studio/server.ts'));
   const both = (re) => countOf(client, re) + countOf(server, re);
   const appendTags = both(/appendTags:\s*true/g);
   const completer = both(/fetchTemplateEntry\b/g) >= 2;
@@ -73,8 +73,12 @@ async function main() {
   // 2 — the node's own tag. wrap:false without the spread is WORSE than neither:
   // Studio puts nothing on a wrapper and the component drops it, so the node
   // cannot be selected on the canvas at all.
-  const registry = code(read('lib/studio-components.ts'));
-  const registrations = countOf(registry, /register(?:Lazy)?Component\(/g);
+  const registry = code(read('studio/register.ts'));
+  // One per registered component, whichever API registered it: a `component:`
+  // key in a registerComponents / registerComponent config, or a
+  // registerLazyComponent call (its config carries no `component:` key).
+  const registrations =
+    countOf(registry, /\bcomponent:/g) + countOf(registry, /registerLazyComponent\(/g);
   const wraps = countOf(registry, /wrap:\s*false/g);
   const componentFiles = fs
     .readdirSync(path.join(ROOT, 'components'))
@@ -93,7 +97,7 @@ async function main() {
   const thumbs = countOf(registry, /thumbnailUrl:/g);
   check(
     3,
-    'thumbnailUrl on every registerComponent call',
+    'thumbnailUrl on every registration',
     registrations === thumbs,
     `${registrations} registrations · ${thumbs} thumbnails`,
   );
