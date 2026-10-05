@@ -164,7 +164,7 @@ Connected  /articles/{{entry.title}}  article            (every entry, its own p
            Site Header → Article Header → Article Body → Featured Articles → Site Footer
 
 Connected  /shop/{{entry.title}}      shop_landing_page  (every entry, its own page)
-           Site Header → Page Blocks → Site Footer
+           Site Header → Repeater over the entry's blocks → Site Footer
 ```
 
 All three are **Connected** templates, bound to a content type, which is why
@@ -182,16 +182,20 @@ block type looks.
 ```
 Template: Shop Landing Page
 ├── Site Header
-├── Page Blocks                         reads the whole entry
-│   └── Stack (list) → Repeater over `blocks` → Stack (item)
-│       ├── Condition: hero_split       → Section Slot → Block · Hero Split
-│       ├── Condition: hero_full_bleed  → Section Slot → Block · Hero Full Bleed
-│       ├── Condition: promo_banner     → Section Slot → Block · Promo Banner
-│       ├── Condition: category_tiles   → Section Slot → Block · Category Tiles
-│       ├── Condition: product_grid     → Section Slot → Block · Product Grid
-│       └── Condition: editorial        → Section Slot → Block · Editorial Story
+├── Stack (list) → Repeater over `blocks` → Stack (item)
+│   ├── Condition: hero_split       → Block · Hero Split
+│   ├── Condition: hero_full_bleed  → Block · Hero Full Bleed
+│   ├── Condition: promo_banner     → Block · Promo Banner
+│   ├── Condition: category_tiles   → Block · Category Tiles
+│   ├── Condition: product_grid     → Block · Product Grid
+│   └── Condition: editorial        → Block · Editorial Story
 └── Site Footer
 ```
+
+The Repeater and Condition Blocks sit on the template itself, so the routing is
+visible in the template's layer tree. The **Page Blocks** Section packs the same
+list into one reusable Section (with a Section Slot per block type). It stays in
+the library, but this template doesn't use it.
 
 - **Reorder the blocks in the entry and the page follows.** No Studio change, no deploy.
 - **Each block type is its own Section.** Redesign the Promo Banner once and every page changes.

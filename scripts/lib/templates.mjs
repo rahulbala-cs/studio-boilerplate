@@ -17,9 +17,15 @@
  *  3. `data_sources.resolvedReferences` — reference fields arrive as bare
  *     `{uid}` stubs otherwise, so the Repeater iterates nothing.
  */
-import { nid, node, page, StaticValues } from './composition.mjs';
-import { FEATURED_SLOT_UID, EXPOSED_HEADING, EXPOSED_TONE } from './sections.mjs';
-import { SHOP_BLOCK_TYPES, blockSlotUid } from './shop-sections.mjs';
+import { nid, node, page, tmpl, rep, StaticValues } from './composition.mjs';
+import {
+  FEATURED_SLOT_UID,
+  EXPOSED_HEADING,
+  EXPOSED_TONE,
+  STACK,
+  stackProps,
+} from './sections.mjs';
+import { SHOP_BLOCK_TYPES } from './shop-sections.mjs';
 import { COMPOSITIONS_CT } from './config.mjs';
 
 const URL_QUERIES = JSON.stringify({ include: [], only: {}, where: {} });
@@ -202,19 +208,41 @@ export function buildTemplates(s) {
   article.static_value = artSv.toEntryField();
 
   // ── Shop Landing Page ─────────────────────────────────────────────────────
-  // Header, Page Blocks, Footer — and nothing else. The page's body is whatever
-  // blocks the entry holds, in the entry's order: Page Blocks iterates them and
-  // routes each one to its block Section. Adding a new shop page, or
-  // rearranging one, needs no change here.
-  const blockFills = Object.fromEntries(
-    SHOP_BLOCK_TYPES.map(({ block, key, title }) => [
-      blockSlotUid(block),
-      place(s[key].uid, nid('shop', 'fill', block), {
-        title,
-        selectedField: `blocks.${block}`,
-        matchedCt: 'shop_landing_page',
-      }),
-    ]),
+  // The block list is built right here on the template, not inside a Section:
+  //
+  //   Stack (list) → Repeater over `blocks` → Stack (item)
+  //     ├── Condition Block: hero_split → Block · Hero Split
+  //     └── …one per block type
+  //
+  // The entry decides which blocks appear and in what order; each block Section
+  // decides how its type looks. The conditions follow the rules at the top of
+  // shop-sections.mjs. (Page Blocks packs this same list into one Section; it
+  // stays in the library but this template does not use it.)
+  const shopSv = new StaticValues();
+  const shopList = nid('shop', 'list');
+  const shopRid = nid('shop', 'repeater');
+  const shopItem = nid('shop', 'item');
+  const blockBranches = SHOP_BLOCK_TYPES.map(({ block, key, title }) =>
+    node('condition-block', nid('shop', 'condition', block), {
+      title: `If ${title.replace('Block · ', '')}`,
+      metadata: {
+        condition: {
+          type: 'modular_block',
+          operator: 'eq',
+          value: block,
+          subType: 'block_name',
+          conditionBinding: rep(shopRid, block),
+          dataBinding: rep(shopRid, block),
+        },
+      },
+      children: [
+        place(s[key].uid, nid('shop', 'fill', block), {
+          title,
+          selectedField: `blocks.${block}`,
+          matchedCt: 'shop_landing_page',
+        }),
+      ],
+    }),
   );
   const shop = {
     title: 'Shop Landing Page Template',
@@ -231,27 +259,46 @@ export function buildTemplates(s) {
     linked_schemas: [],
     linked_sections: [
       s.site_header.uid,
-      s.page_blocks.uid,
       ...SHOP_BLOCK_TYPES.map(({ key }) => s[key].uid),
       s.site_footer.uid,
     ].map((uid) => ({ uid, _content_type_uid: COMPOSITIONS_CT })),
-    static_value: new StaticValues().toEntryField(),
+    static_value: null, // filled below, once every key is registered
     __tree: page(nid('shop', 'page'), [
       place(s.site_header.uid, nid('shop', 'header'), {
         title: 'Site Header',
       }),
-      place(s.page_blocks.uid, nid('shop', 'blocks'), {
-        title: 'Page Blocks',
-        // No selectedField: Page Blocks reads the whole entry (its Repeater
-        // binds `blocks`). The slot fills still resolve at `blocks.<block>`.
-        matchedCt: 'shop_landing_page',
-        slotFills: blockFills,
+      // The two Stacks are for Visual Editor's add / move / delete controls,
+      // which need a `blocks` tag around the list and a `blocks.N` tag around
+      // each block (see Page Blocks in shop-sections.mjs for the full why).
+      node(STACK, shopList, {
+        title: 'Blocks list',
+        metadata: { repeaterWrapper: true },
+        props: stackProps(shopSv, shopList, {
+          gap: 'none',
+          align: 'stretch',
+          emptyAddButton: true,
+        }),
+        children: [
+          node('repeater', shopRid, {
+            title: 'Each block, in entry order',
+            metadata: { mode: 'preview', repeaterBindingFieldType: 'blocks' },
+            props: { items: { type: 'array', binding: tmpl('blocks') } },
+            children: [
+              node(STACK, shopItem, {
+                title: 'Block',
+                props: stackProps(shopSv, shopItem, { gap: 'none', align: 'stretch' }),
+                children: blockBranches,
+              }),
+            ],
+          }),
+        ],
       }),
       place(s.site_footer.uid, nid('shop', 'footer'), {
         title: 'Site Footer',
       }),
     ]),
   };
+  shop.static_value = shopSv.toEntryField();
 
   return [home, article, shop];
 }
